@@ -1,0 +1,75 @@
+{
+  "name": "dsh-tokenledger",
+  "version": "0.1.1",
+  "description": "Token usage accounting for DeepSeek Harness, attributed to the relay site that served each request — maintained fork of zh667/TokenLedger with the sessionPersistence handle-based API fix and built-in official DeepSeek CNY pricing",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wangk123/dsh-tokenledger.git"
+  },
+  "homepage": "https://github.com/wangk123/dsh-tokenledger",
+  "exports": {
+    ".": "./src/index.js",
+    "./usage": "./src/usage.js",
+    "./discovery": "./src/discovery.js",
+    "./relay-sites": "./src/relay-sites.js",
+    "./pricing": "./src/pricing.js",
+    "./store": "./src/store.js",
+    "./reconcile": "./src/reconcile.js",
+    "./adapters/newapi": "./src/adapters/newapi.js",
+    "./adapters/sub2api": "./src/adapters/sub2api.js",
+    "./adapters/detect": "./src/adapters/detect.js",
+    "./package.json": "./package.json",
+    "./plugin": "./src/plugin.js",
+    "./report": "./src/report.js",
+    "./http": "./src/http.js",
+    "./balance": "./src/balance.js",
+    "./client": "./src/client.js"
+  },
+  "files": [
+    "src",
+    "cordis.patch.yml",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "docs/images"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\""
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "token-usage",
+    "billing",
+    "newapi",
+    "sub2api",
+    "dsh-bundle",
+    "cordis-plugin"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-primitives"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/schemastery": {
+      "optional": true
+    }
+  }
+}

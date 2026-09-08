@@ -1,0 +1,37 @@
+# The TokenLedger bundle patch.
+#
+# Adding `dsh-tokenledger` to a profile's `dsh.profile.bundles` applies this
+# automatically — there is no YAML for a user to hand-write.
+#
+# It works with no configuration at all: every call attributes to `direct` and
+# the per-day, per-model report is already correct. One line per relay adds the
+# site dimension, keyed by the DSH provider route that serves it:
+#
+#   - id: tokenledger
+#     config:
+#       relays:
+#         my-route: https://relay.example.com/v1
+#
+# `my-route` is the key under `dsh-llm-pi-ai`'s `config.providers` — the same
+# string that arrives as `AssistantProvenance.provider` on every assistant
+# message. The site id, its exact domain, and which relay software it runs are
+# all derived; the route is the only thing this code cannot work out for
+# itself. A longer form overrides any of them:
+#
+#       relays:
+#         my-route:
+#           baseUrl: https://relay.example.com/v1
+#           id: my-label
+#           type: sub2api
+
+# The entry name is the BARE package name, deliberately. The client-module
+# scanner treats it as a package specifier and resolves `<name>/package.json`;
+# a subpath such as `dsh-tokenledger/plugin` fails that resolve, is cached as
+# "not a client package", and the panel silently never loads.
+- insert:
+    - id: tokenledger
+      name: dsh-tokenledger
+      config:
+        database: !!js dshHomePath('tokenledger.sqlite')
+        sweepIntervalMs: 60000
+        sweepOnStart: true
