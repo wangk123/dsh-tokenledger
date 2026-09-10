@@ -1,7 +1,7 @@
 {
   "name": "dsh-tokenledger",
-  "version": "0.1.1",
-  "description": "Token usage accounting for DeepSeek Harness, attributed to the relay site that served each request — maintained fork of zh667/TokenLedger with the sessionPersistence handle-based API fix and built-in official DeepSeek CNY pricing",
+  "version": "0.1.2",
+  "description": "Token usage accounting for DeepSeek Harness, attributed to the relay site that served each request — maintained fork of zh667/TokenLedger with the sessionPersistence handle-based API fix and a dated official DeepSeek CNY price schedule",
   "type": "module",
   "license": "MIT",
   "repository": {

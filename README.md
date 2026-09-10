@@ -60,7 +60,7 @@ dsh plugin --profile web remove dsh-tokenledger
 | --- | --- |
 | 🔧 **会话持久化 API 修复** | Harness 2026-08-28 起把 `sessionPersistence` 换成了 handle-based 模型（commit `bec6805d6a`），`listSnapshots()` / `readFrom(id, seq)` 已从源码删除。上游每次扫描第一步就抛 `TypeError`，异常被静默吞掉 → 面板永远为空。本分叉改走 `list()` / `open(id, "read")` → `read(offset)` → `close()`，同时保留旧接口回退分支，老宿主照常可用。 |
 | 🔢 **seq 重编号兜底** | 会话 v1→v2 格式迁移会把事件 `seq` **重新编号**，旧 checkpoint 里的 `consumedSeq` 直接续读会越过整个日志、静默漏计。本分叉在 revision 变化时从 0 全量重折叠——`commitSession` 按会话整表替换 rollup 行，重折叠幂等，不会重复计数。 |
-| 💰 **官方 ¥ 价目表兜底** | 未配置 `rates` 时自动按 DeepSeek 官方人民币价（[定价页](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/)，2026-09-08 抓取，峰时档）：`deepseek-v4-flash` / `-vision-exp` 缓存命中 ¥0.10/M、未命中 ¥3/M、输出 ¥9/M；`deepseek-v4-pro` ¥0.30/M、¥9/M、¥27/M。徽章显示「今日总 token · 今日金额」，面板用量详情的金额列与汇总同时生效；非 DeepSeek 模型保持「—」不瞎算。配置了 `rates` 时**永远优先**你的价目表。 |
+| 💰 **官方 ¥ 价目表兜底** | 未配置 `rates` 时自动按 DeepSeek 官方人民币价（峰时档）计价，并**按生效日分档**保留历史价格（[定价页](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/)，2026-09-10 抓取）：**V4.1 Flash**（`deepseek-flash`，含旧名 `deepseek-v4-flash`、`-vision-exp` 与预览别名 `deepseek-v4.1-flash-expires-on-0910`）2026-09-10 起 ¥0.04/M 命中、¥2/M 未命中、¥8/M 输出；**V4 Pro** ¥0.30/M、¥9/M、¥27/M，2026-09-14 起随下线改按 Flash 价计。徽章显示「今日总 token · 今日金额」，面板用量详情的金额列与汇总同时生效；非 DeepSeek 模型保持「—」不瞎算。配置了 `rates` 时**永远优先**你的价目表。 |
 | 🔤 **Token 单位紧凑化** | 徽章、三窗口卡片、站点/模型行、活跃度热力图全部改用 `1.33B / 27.69M / 862.4K`，超大数字不再溢出（悬浮提示仍显示完整数字）。 |
 
 ## 命令 / Commands
@@ -174,6 +174,12 @@ npm pack --dry-run
 > ⚠️ **非官方声明**：TokenLedger 是独立的第三方社区项目，与 DeepSeek 无隶属、赞助或背书关系。「DeepSeek」及相关商标归其权利人所有。
 
 ## 变更记录 / Changelog
+
+### 0.1.2（2026-09-10）
+
+- 新增：跟随 DeepSeek 2026-09-10 的模型改名与调价——`deepseek-flash`（V4.1 Flash）¥0.04/¥2/¥8（命中/未命中/输出，峰时），旧名 `deepseek-v4-flash`、`deepseek-v4-flash-vision-exp` 自该日起按 Flash 计价，预览别名 `deepseek-v4.1-flash-expires-on-0910` 按 V4.1 Flash 计价
+- 新增：V4 Pro 2026-09-14 下线后的计价切换（当日 12:00 起官方路由到 V4.1 Flash 并按 Flash 价计费；价表按天粒度，09-14 全天按 Flash 价，属轻微低估而非高估）
+- 修复：价表改为**按生效日分档**，历史用量继续按当时价格计算，不再用新价重算旧账
 
 ### 0.1.1（2026-09-08）
 

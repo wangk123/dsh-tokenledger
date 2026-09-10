@@ -238,22 +238,28 @@ export const DEEPSEEK_OFF_PEAK = definePeriod({
  * Official DeepSeek API prices, per million tokens, CNY, peak hours.
  *
  * Source: https://api-docs.deepseek.com/zh-cn/quick_start/pricing/ (fetched
- * 2026-09-08). Official peak windows are Mon–Fri 09:00–12:00 and 14:00–18:00
+ * 2026-09-10). Official peak windows are Mon–Fri 09:00–12:00 and 14:00–18:00
  * Beijing time; off-peak is exactly half of these. Observed installs are
  * overwhelmingly inside the peak windows, so the default prices everything at
  * peak — an off-peak-heavy day is overestimated, never understated, and a
  * user-supplied `rates` list always wins.
  *
+ * The table is a SCHEDULE, not a snapshot: DeepSeek renamed and repriced its
+ * models on 2026-09-10 (`deepseek-flash`, i.e. V4.1 Flash, at ¥0.04/¥2/¥8
+ * peak, down from ¥0.10/¥3/¥9) and retires V4 Pro on 2026-09-14. Pricing a day
+ * with the wrong generation's rates is a wrong number, so each generation
+ * keeps its own `effectiveFrom` and history keeps the prices it was billed at.
+ * `RateTable.rateFor` picks the newest rate whose `effectiveFrom` is on or
+ * before the day being priced.
+ *
  * Token-bucket mapping follows the DeepSeek usage report: `cacheReadTokens` is
  * the cache-hit prompt, `inputTokens` the cache-miss prompt, and `outputTokens`
  * the completion. DeepSeek does not bill cache writes separately, so
  * `cacheWriteTokens` stays unpriced here rather than being silently free.
- *
- * Effective from 2026-09-01 — before that date the plugin remains unpriced,
- * which is the honest reading of "this number changed" rather than pricing
- * August's traffic with September's prices.
  */
 export const DEEPSEEK_OFFICIAL_RATES = Object.freeze([
+	// --- V4 generation (2026-09-01 schedule) ---------------------------------
+	// Kept so August/early-September traffic keeps the prices it was billed at.
 	defineRate({
 		model: "deepseek-v4-flash",
 		currency: "CNY",
@@ -271,5 +277,45 @@ export const DEEPSEEK_OFFICIAL_RATES = Object.freeze([
 		currency: "CNY",
 		effectiveFrom: "2026-09-01",
 		perMillion: { cacheReadTokens: 0.3, inputTokens: 9.0, outputTokens: 27.0 }
+	}),
+	// The V4.1 Flash preview alias IS V4.1 Flash from its first appearance, so
+	// it carries V4.1 prices even on days before the public rename.
+	defineRate({
+		model: "deepseek-v4.1-flash-expires-on-0910",
+		currency: "CNY",
+		effectiveFrom: "2026-09-01",
+		perMillion: { cacheReadTokens: 0.04, inputTokens: 2.0, outputTokens: 8.0 }
+	}),
+	// --- V4.1 generation (2026-09-10 schedule) -------------------------------
+	// `deepseek-v4-flash` and `deepseek-v4-flash-vision-exp` stay callable but
+	// are served by DeepSeek-V4.1-Flash and billed at Flash prices, so the old
+	// ids get the new prices from the switch date onward.
+	defineRate({
+		model: "deepseek-flash",
+		currency: "CNY",
+		effectiveFrom: "2026-09-10",
+		perMillion: { cacheReadTokens: 0.04, inputTokens: 2.0, outputTokens: 8.0 }
+	}),
+	defineRate({
+		model: "deepseek-v4-flash",
+		currency: "CNY",
+		effectiveFrom: "2026-09-10",
+		perMillion: { cacheReadTokens: 0.04, inputTokens: 2.0, outputTokens: 8.0 }
+	}),
+	defineRate({
+		model: "deepseek-v4-flash-vision-exp",
+		currency: "CNY",
+		effectiveFrom: "2026-09-10",
+		perMillion: { cacheReadTokens: 0.04, inputTokens: 2.0, outputTokens: 8.0 }
+	}),
+	// V4 Pro retires: from 2026-09-14 its requests route to V4.1 Flash and are
+	// billed at Flash prices. The schedule is day-granular, so the few hours of
+	// 09-14 before 12:00 Beijing are priced at Flash as well — an undercount on
+	// a retiring model, never an overcount.
+	defineRate({
+		model: "deepseek-v4-pro",
+		currency: "CNY",
+		effectiveFrom: "2026-09-14",
+		perMillion: { cacheReadTokens: 0.04, inputTokens: 2.0, outputTokens: 8.0 }
 	})
 ]);
